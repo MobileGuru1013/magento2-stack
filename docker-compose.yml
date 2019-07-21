@@ -1,0 +1,63 @@
+version: '3'
+services:
+  apache:
+    image: maximuspoder/apache
+    ports:
+      - "80:80"
+      - "9001:9000"
+    volumes:
+      - ./src:/var/www/html
+      - ~/.composer:/var/www/.composer
+    environment:
+      XDEBUG_CONFIG: "remote_host=localhost"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - maximuspoder-network
+
+  db:
+    image: mariadb
+    ports:
+     - 3300:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=magento
+      - MYSQL_USER=magento
+      - MYSQL_PASSWORD=magento
+    volumes:
+      - dbdatabase:/var/lib/mysql
+    networks:
+      - maximuspoder-network
+
+  redis:
+    image: redis
+    ports:
+     - 6379
+    networks:
+      - maximuspoder-network
+
+  redis-session:
+    image: redis
+    ports:
+     - 6379
+    networks:
+      - maximuspoder-network
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025
+      - 8025:8025
+    networks:
+      - maximuspoder-network
+
+networks:
+  maximuspoder-network:
+    driver: bridge
+
+volumes:
+  dbdatabase:
+    driver: local
